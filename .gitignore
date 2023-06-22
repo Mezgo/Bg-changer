@@ -1,4 +1,5 @@
 venv
 imgs
 bgs
-
+*.jpg
+*.jpeg
