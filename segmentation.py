@@ -9,8 +9,8 @@ selfie_segmentation = mp.solutions.selfie_segmentation
 
 def fit_img(img):
     """fit the image to an specified size"""
-    target_width = 720
-    proper_height = 720
+    target_width = 1080
+    proper_height = 1080
     if width > target_width or height > proper_height:
         print('entro al if')
         aspect_ratio = width / height
@@ -26,7 +26,8 @@ def fit_img(img):
 with selfie_segmentation.SelfieSegmentation(
         model_selection=0) as selfie_segmentation:
 
-    image = cv2.imread('imgs/3.jpg')
+    image = cv2.imread('imgs/6.jpg')
+    bg_content = cv2.imread('bgs/1.jpg')
     # Get the image size
     height, width = image.shape[:2]
 
@@ -38,7 +39,7 @@ with selfie_segmentation.SelfieSegmentation(
     results = selfie_segmentation.process(image_rgb)
 
     # normalization
-    _, th = cv2.threshold(results.segmentation_mask, 0.75, 255,
+    _, th = cv2.threshold(results.segmentation_mask, 0.65, 255,
                           cv2.THRESH_BINARY)
 
     print(th.dtype)
@@ -47,15 +48,16 @@ with selfie_segmentation.SelfieSegmentation(
     th_inv = cv2.bitwise_not(th)
 
     # Background
-    bg_content = np.ones(image.shape, dtype=np.uint8)
-    bg_content[:] = BG_COLOR
-
+    # bg_content = np.ones(image.shape, dtype=np.uint8)
+    # bg_content[:] = BG_COLOR
+    
+    bg_content = fit_img(bg_content)
     bg = cv2.bitwise_and(bg_content, bg_content, mask=th_inv)
 
-    # Foreground
+    # # Foreground
     fg = cv2.bitwise_and(image, image, mask=th)
 
-    # Background + Foreground
+    # # Background + Foreground
     output = cv2.add(bg, fg)
 
     cv2.imshow('image', image)
@@ -67,3 +69,4 @@ with selfie_segmentation.SelfieSegmentation(
     # cv2.imshow('fg', fg)
     cv2.imshow('output', output)
     cv2.waitKey(0)
+    cv2.imwrite('output_image.jpg', output)
